@@ -4,16 +4,6 @@ require_relative 'cab_call'
 require_relative 'cab_call_queue'
 require_relative 'cab_call_unit'
 
-# machine_room does the following:
-# [x] 1. creates a cab_call_queue
-# [x] 2. creates one or more cab_call_units for each floor, and passes the queue to each.
-# [x]    these will sent the queue cab_call objects
-# [x] 3. creates cabs and passes the queue.
-# [ ]    cabs will listen to queue and take calls.
-# 4. ?? create a cab_operation_panel
-# 5. ?? create cab_shafts and pass them cabs
-# 6. ?? create a cab bank and pass it cab_shafts (that may or may not have cabs)
-
 class MachineRoom
   attr_reader :active, :num_floors, :num_cabs, :cab_call_queue, :cab_call_units, :cabs
 
@@ -80,7 +70,6 @@ class MachineRoom
   end
 
   def activate_cabs!
-    # activate all cabs
     puts "[machine room] activating all cabs"
     cabs.each { |cab| cab.activate! }
   end
