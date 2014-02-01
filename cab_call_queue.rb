@@ -29,6 +29,10 @@ class CabCallQueue
     end
   end
 
+  def calls_for(cab)
+    calls.select { |call| call.claimed_by == cab }
+  end
+
   def to_s
     message = @calls.map do |call|
       "\n\t[call] from_floor: #{call.from_floor}, direction: #{call.direction}, claimed_by: #{call.claimed_by}"

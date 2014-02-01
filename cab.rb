@@ -1,10 +1,9 @@
 class Cab
-  attr_reader :current_floor, :cab_call_queue, :cab_stop_queue
+  attr_reader :current_floor, :cab_call_queue
 
   def initialize(opts = {})
     @current_floor = opts[:current_floor] || 1
     @cab_call_queue = opts[:cab_call_queue]
-    @cab_stop_queue = []
   end
 
   def activate!
@@ -12,16 +11,19 @@ class Cab
     @thread = Thread.new do
       loop do
         puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
-        @cab_stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
+        stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
         call = @cab_call_queue.calls.last
         if call && call.unclaimed?
           puts "[cab] attempting to claim #{call}\n"
           claimed =  @cab_call_queue.claim(call, self)
-          @cab_stop_queue << claimed unless claimed.nil?
         end
         sleep 10
       end
     end
+  end
+
+  def stop_queue
+    @cab_call_queue.calls_for(self)
   end
 
   def deactivate
