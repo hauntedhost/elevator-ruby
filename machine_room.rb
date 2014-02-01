@@ -1,53 +1,78 @@
+require 'debugger'
+
 # machine_room does the following:
-#   creates a call_request_queue
-#   creates a call_station for each floor, and pass it the queue. it will sent the queue call_request objects
-#   creates cabs
-#   ?? create a cab_operation_panel
-#   ?? create cab_shafts and pass them cabs
-#   ?? create a cab bank and pass it cab_shafts (that may or may not have cabs)
+# [x] 1. creates a cab_call_queue
+# [x] 2. creates one or more cab_call_units for each floor, and passes the queue to each.
+# [x]    these will sent the queue cab_call objects
+# [x] 3. creates cabs and passes the queue.
+# [ ]    cabs will listen to queue and take calls.
+# 4. ?? create a cab_operation_panel
+# 5. ?? create cab_shafts and pass them cabs
+# 6. ?? create a cab bank and pass it cab_shafts (that may or may not have cabs)
 
 if __FILE__ == $0
   require_relative 'cab'
-  require_relative 'call_request'
-  require_relative 'call_request_queue'
-  require_relative 'call_station'
+  require_relative 'cab_call'
+  require_relative 'cab_call_queue'
+  require_relative 'cab_call_unit'
+
+  # create call queue
+  puts "[machine room] creating cab call queue"
+  cab_call_queue = CabCallQueue.new
+
+  # create cab call units for each floor, pass queue to each
+  puts "[machine room] creating call units for each floor"
+  FLOORS = 12
+  cab_call_units = [].tap do |units|
+    1.upto(FLOORS) do |floor_num|
+      units << CabCallUnit.new(on_floor: floor_num, cab_call_queue: cab_call_queue)
+    end
+  end
+  puts "[machine room] cab call units created:"
+  cab_call_units.each { |unit| puts "\t#{unit}" }
+
+  # create a few cabs and pass the queue to each
+  TOTAL_CABS = 3
+  puts "[machine room] creating #{TOTAL_CABS} cabs"
+  cabs = TOTAL_CABS.times.inject([]) do |cabs, num|
+    cab = Cab.new(cab_call_queue: cab_call_queue)
+    cabs << cab
+  end
+  puts "[machine room] cabs created:"
+  cabs.each { |cab| puts "\t#{cab}" }
+
+  # activate all cabs
+  puts "[machine room] activating all cabs"
+  cabs.each { |cab| cab.activate! }
 
   Thread.abort_on_exception = true
-  q = CallRequestQueue.new
-
   caller = Thread.new do
     i = 0
     loop do
-      request = CallRequest.random
-      puts "submitting request: #{request}\n"
-      q.add(request)
-      sleep 10
+      unit = cab_call_units.sample
+      call = CabCall.new(from_floor: unit.on_floor, direction: %w[up down].sample)
+      puts "[machine room] artificially triggering unit #{unit} to make call #{call}\n"
+      cab_call_queue.add(call)
+      sleep 12
     end
   end
 
-  # def fulfill(thread, q)
-  #   loop do
-  #     request = CallRequest.random
-  #     puts "current requests in queue: #{q}\n"
-  #     puts "#{thread} trying to fulfill request #{request}\n"
-  #     q.take(request)
-  #     sleep 3
+  # threads = (1..3).map do |n|
+  #   Thread.new do
+  #     # fulfill("thread ##{n}", q)
+  #     # sleep 3
+  #     loop do
+  #       puts "[machine room] current calls in queue: #{cab_call_queue}\n"
+  #       # unit = cab_call_units.sample
+  #       # call = CabCall.new(from_floor: unit.on_floor, direction: %[up down].sample)
+  #       # puts "unit #{unit} in thread #{n} making call #{call}\n"
+  #       # cab_call_queue.take(call)
+  #       sleep 3
+  #     end
   #   end
   # end
 
-  threads = (1..3).map do |n|
-    Thread.new do
-      # fulfill("thread ##{n}", q)
-      # sleep 3
-      loop do
-        request = CallRequest.random
-        puts "current requests in queue: #{q}\n"
-        puts "thread ##{n} trying to fulfill request #{request}\n"
-        q.take(request)
-        sleep 3
-      end
-    end
-  end
+  # threads.each(&:join)
 
-  threads.each(&:join)
+  caller.join
 end

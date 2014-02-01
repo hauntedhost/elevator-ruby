@@ -1,4 +1,4 @@
-class CallRequest
+class CabCall
   attr_accessor :from_floor, :direction
 
   def initialize(opts = {})
@@ -11,11 +11,11 @@ class CallRequest
   end
 
   def to_s
-    "from_floor: #{from_floor}, direction: #{direction}"
+    "[call] from_floor: #{from_floor}, direction: #{direction}"
   end
 
   def self.random
-    from_floor = rand(12)
+    from_floor = (1..12).to_a.sample
     direction = %w[up down].sample
     request = new(from_floor: from_floor, direction: direction)
   end
