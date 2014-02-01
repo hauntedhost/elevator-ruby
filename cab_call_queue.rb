@@ -17,11 +17,11 @@ class CabCallQueue
     end
   end
 
-  def take(call)
+  def claim(call, cab)
     @lock.synchronize do
-      if @calls.include?(call)
-        puts "[queue] removing: #{call}"
-        @calls.delete(call) # returns deleted call
+      if @calls.include?(call) && call.unclaimed?
+        puts "[queue] claiming: #{call}"
+        call.claimed_by = cab
       else
         puts "[queue] does not contain: #{call}\n"
         nil
@@ -30,8 +30,9 @@ class CabCallQueue
   end
 
   def to_s
-    @calls.map { |call| "[call] from_floor: #{call.from_floor}, direction: #{call.direction}" }.join(', ')
-                                                                                              .insert(0, '[')
-                                                                                              .insert(-1, ']')
+    message = @calls.map do |call|
+      "\n\t[call] from_floor: #{call.from_floor}, direction: #{call.direction}, claimed_by: #{call.claimed_by}"
+    end
+    message.join
   end
 end

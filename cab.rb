@@ -1,5 +1,5 @@
 class Cab
-  attr_reader :current_floor, :cab_stop_queue, :cab_call_queue #, :floor_requests
+  attr_reader :current_floor, :cab_call_queue, :cab_stop_queue
 
   def initialize(opts = {})
     @current_floor = opts[:current_floor] || 1
@@ -13,12 +13,11 @@ class Cab
       loop do
         puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
         @cab_stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
-        # puts "[cab] WARNING: cab stop queue contains nil" if @cab_stop_queue.include?(nil)
         call = @cab_call_queue.calls.last
-        unless call.nil?
-          puts "[cab] attempting to take #{call}\n"
-          taken =  @cab_call_queue.take(call)
-          @cab_stop_queue << taken unless taken.nil?
+        if call && call.unclaimed?
+          puts "[cab] attempting to claim #{call}\n"
+          claimed =  @cab_call_queue.claim(call, self)
+          @cab_stop_queue << claimed unless claimed.nil?
         end
         sleep 10
       end
@@ -53,17 +52,7 @@ class Cab
   #   end
   # end
 
-  # private
-
-  # def start_worker
-  #   return if active?
-  #   @thread = Thread.new do
-  #     while active?
-  #       puts "hello from cab ##{number}. request queue is \n"
-  #       sleep 12
-  #     end
-  #   end
-  # end
+  private
 
   def drive_up
   end
@@ -79,15 +68,6 @@ class Cab
     # pause 10 seconds
   end
 end
-
-# cab1 = Cab.new
-# cab2 = Cab.new
-# cab1.activate
-# cab2.activate
-
-# while cab1.active? || cab2.active? do
-#   #
-# end
 
 # class OperatingPanel
 #   attr_reader :num_floors

@@ -1,9 +1,18 @@
 class CabCall
-  attr_accessor :from_floor, :direction
+  attr_accessor :from_floor, :direction, :claimed_by
 
   def initialize(opts = {})
     @from_floor = opts[:from_floor]
     @direction = opts[:direction]
+    @claimed_by = nil
+  end
+
+  def claimed?
+    !!claimed_by
+  end
+
+  def unclaimed?
+    !claimed?
   end
 
   def ==(other)
