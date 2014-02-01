@@ -1,16 +1,25 @@
 class Cab
-  attr_reader :current_floor, :cab_call_queue #, :floor_requests
+  attr_reader :current_floor, :cab_stop_queue, :cab_call_queue #, :floor_requests
 
   def initialize(opts = {})
     @current_floor = opts[:current_floor] || 1
     @cab_call_queue = opts[:cab_call_queue]
+    @cab_stop_queue = []
   end
 
   def activate!
     return if active?
     @thread = Thread.new do
       loop do
-        puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, call queue is: #{@cab_call_queue}\n"
+        puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
+        @cab_stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
+        # puts "[cab] WARNING: cab stop queue contains nil" if @cab_stop_queue.include?(nil)
+        call = @cab_call_queue.calls.last
+        unless call.nil?
+          puts "[cab] attempting to take #{call}\n"
+          taken =  @cab_call_queue.take(call)
+          @cab_stop_queue << taken unless taken.nil?
+        end
         sleep 10
       end
     end

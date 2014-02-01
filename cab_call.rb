@@ -7,7 +7,7 @@ class CabCall
   end
 
   def ==(other)
-    from_floor == other.from_floor && direction == other.direction
+    self.from_floor == other.from_floor && self.direction == other.direction
   end
 
   def to_s
@@ -16,7 +16,7 @@ class CabCall
 
   def self.random
     from_floor = (1..12).to_a.sample
-    direction = %w[up down].sample
+    direction = [:up, :down].sample
     request = new(from_floor: from_floor, direction: direction)
   end
 end

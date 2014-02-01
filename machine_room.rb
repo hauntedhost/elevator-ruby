@@ -49,9 +49,10 @@ if __FILE__ == $0
   caller = Thread.new do
     i = 0
     loop do
+      puts "[machine room] queue is: #{cab_call_queue}\n"
       unit = cab_call_units.sample
-      call = CabCall.new(from_floor: unit.on_floor, direction: %w[up down].sample)
-      puts "[machine room] artificially triggering unit #{unit} to make call #{call}\n"
+      call = CabCall.new(from_floor: unit.on_floor, direction: [:up, :down].sample)
+      puts "[machine room] artificially triggering #{unit} to make #{call}\n"
       cab_call_queue.add(call)
       sleep 12
     end
