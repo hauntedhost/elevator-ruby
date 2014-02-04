@@ -10,12 +10,14 @@ class Cab
     return if active?
     @thread = Thread.new do
       loop do
-        puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
-        stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
-        call = @cab_call_queue.calls.last
-        if call && call.unclaimed?
-          puts "[cab] attempting to claim #{call}\n"
-          claimed =  @cab_call_queue.claim(call, self)
+        if ENV['DEBUG']
+          puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
+          stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
+        end
+        cab_call = cab_call_queue.queue.last
+        if cab_call && cab_call.unclaimed?
+          puts "[cab] attempting to claim #{cab_call}\n" if ENV['DEBUG']
+          claimed = cab_call_queue.claim(cab_call, self)
         end
         sleep 10
       end
@@ -23,19 +25,19 @@ class Cab
   end
 
   def stop_queue
-    @cab_call_queue.calls_for(self)
+    cab_call_queue.claimed_by(self)
   end
 
   def deactivate
-    @thread && @thread.kill
+    thread && thread.kill
   end
 
   def active?
-    !!(@thread && @thread.alive?)
+    !!(thread && thread.alive?)
   end
 
   def to_s
-    "[cab] id: #{__id__}, current_floor: #{current_floor}"
+    ENV['DEBUG'] ? "[cab] id: #{__id__}, current_floor: #{current_floor}" : super
   end
 
   # def is_valid_floor_request?(floor_num)
@@ -55,6 +57,10 @@ class Cab
   # end
 
   private
+
+  def thread
+    @thread
+  end
 
   def drive_up
   end

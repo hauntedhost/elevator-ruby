@@ -1,4 +1,4 @@
-require 'spec_helper'
+require_relative '../lib/cab_call'
 
 describe CabCall do
   it "considers instances to be equal when both from_floor and direction are equal" do

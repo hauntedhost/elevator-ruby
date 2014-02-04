@@ -1,7 +1,7 @@
 The Elevator Algorithm
 ======================
 
-![](https://raw2.github.com/somlor/elevatory-ruby/master/elevator.jpg)
+![Screenshot](/doc/elevator.jpg)
 
 Create an Elevator System class that manages all the elevators in a highrise.
 

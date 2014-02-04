@@ -16,16 +16,20 @@ class CabCall
   end
 
   def ==(other)
-    self.from_floor == other.from_floor && self.direction == other.direction
-  end
-
-  def to_s
-    "[call] from_floor: #{from_floor}, direction: #{direction}"
+    begin
+      self.from_floor == other.from_floor && self.direction == other.direction
+    rescue NoMethodError
+      false
+    end
   end
 
   def self.random
     from_floor = (1..12).to_a.sample
     direction = [:up, :down].sample
     request = new(from_floor: from_floor, direction: direction)
+  end
+
+  def to_s
+    ENV['DEBUG'] ? "[call] from_floor: #{from_floor}, direction: #{direction}" : super
   end
 end

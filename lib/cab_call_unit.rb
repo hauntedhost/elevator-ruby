@@ -7,6 +7,6 @@ class CabCallUnit
   end
 
   def to_s
-    "[unit] on_floor: #{on_floor}"
+    ENV['DEBUG'] ? "[unit] on_floor: #{on_floor}" : super
   end
 end
