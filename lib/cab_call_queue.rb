@@ -1,4 +1,3 @@
-require 'debugger'
 require_relative 'cab'
 require_relative 'cab_call'
 require_relative 'simple_queue'
@@ -52,6 +51,10 @@ class CabCallQueue < SimpleQueue
     end
   end
 
+  def next
+    queue.first
+  end
+
   def claimed_by(cab)
     where(:claimed_by, cab)
   end
@@ -63,7 +66,7 @@ class CabCallQueue < SimpleQueue
   def to_s
     if ENV['DEBUG']
       message = queue.map do |cab_call|
-        "\n\t[cab_call] from_floor: #{cab_call.from_floor}, direction: #{cab_call.direction}, claimed_by: #{cab_call.claimed_by}"
+        "\n\t[cab_call] floor: #{cab_call.floor}, direction: #{cab_call.direction}, claimed_by: #{cab_call.claimed_by}"
       end
       message.join
     else

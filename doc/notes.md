@@ -11,3 +11,28 @@
 * [? ] 4. create a ``cab_operation_panel``
 * [? ] 5. create ``cab_shafts`` and pass them cabs
 * [?] 6. create a cab bank and pass it ``cab_shafts`` (that may or may not have ``cabs``)
+
+# class OperatingPanel
+#   attr_reader :num_floors
+
+#   def initialize(num_floors)
+#     @num_floors = num_floors
+#   end
+# end
+
+# class CabShaft
+#   attr_reader :cab
+
+#   def initialize(cab = nil)
+#     @cab = nil
+#   end
+
+#   def add_cab(cab)
+#     return false if @cab
+#     @cab = cab
+#   end
+
+#   def remove_cab
+#     @cab = nil
+#   end
+# end

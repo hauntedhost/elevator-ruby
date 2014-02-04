@@ -1,32 +1,60 @@
+require 'debugger'
+
 class Cab
-  attr_reader :current_floor, :cab_call_queue
+  attr_reader :current_floor, :cab_call_queue, :my_queue
 
   def initialize(opts = {})
-    @current_floor = opts[:current_floor] || 1
+    Thread.abort_on_exception = true
+    @current_floor = opts[:current_floor] || 1.0
     @cab_call_queue = opts[:cab_call_queue]
+    @my_queue = []
   end
 
   def activate!
     return if active?
     @thread = Thread.new do
       loop do
-        if ENV['DEBUG']
-          puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
-          stop_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
+        # if ENV['DEBUG']
+        #   puts "[cab] hello from cab ##{__id__} on floor #{current_floor}, my stop queue is:\n"
+        #   my_queue.each { |call| puts "\t[cab] ##{__id__}: #{call}\n" }
+        # end
+
+        # drive_up!
+        puts "[cab] current_floor = #{current_floor}"
+
+        if my_queue.empty? && cab_call_queue.any?
+          claimed_call = cab_call_queue.claim(cab_call_queue.next, self)
+
+          if claimed_call
+            puts "[cab] claimed #{claimed_call}"
+            @my_queue << claimed_call
+            drive_to_floor(claimed_call.floor)
+          end
         end
-        cab_call = cab_call_queue.queue.last
-        if cab_call && cab_call.unclaimed?
-          puts "[cab] attempting to claim #{cab_call}\n" if ENV['DEBUG']
-          claimed = cab_call_queue.claim(cab_call, self)
-        end
-        sleep 10
+
+        # if my_queue.any?
+        #   # if moving?
+        #     # see if there is a call between current_floor + 1 and next stop
+        #   # else
+        #     # get us moving
+        #   # end
+        # else
+        #   # try to claim a call
+        # end
+
+        # cab_call = cab_call_queue.queue.last
+        # if cab_call && cab_call.unclaimed?
+        #   puts "[cab] attempting to claim #{cab_call}\n" if ENV['DEBUG']
+        #   claimed = cab_call_queue.claim(cab_call, self)
+        # end
+        sleep 1
       end
     end
   end
 
-  def stop_queue
-    cab_call_queue.claimed_by(self)
-  end
+  # def my_queue
+  #   cab_call_queue.claimed_by(self)
+  # end
 
   def deactivate
     thread && thread.kill
@@ -36,25 +64,13 @@ class Cab
     !!(thread && thread.alive?)
   end
 
+  def driving?
+    !!(drive_thread && drive_thread.alive?)
+  end
+
   def to_s
     ENV['DEBUG'] ? "[cab] id: #{__id__}, current_floor: #{current_floor}" : super
   end
-
-  # def is_valid_floor_request?(floor_num)
-  #   true
-  # end
-
-  # def look_for_floor_request
-  # end
-
-  # def add_floor_request(floor_num)
-  #   if is_valid_floor_request?(floor_num)
-  #     @floor_requests.enq floor_num
-  #     true
-  #   else
-  #     false
-  #   end
-  # end
 
   private
 
@@ -62,44 +78,45 @@ class Cab
     @thread
   end
 
-  def drive_up
+  def drive_thread
+    @drive_thread
   end
 
-  def drive_down
+  def drive_to_floor(floor)
+    return if driving? || floor == current_floor
+    if current_floor > floor
+      drive_down_to(floor)
+    else
+      drive_up_to(floor)
+    end
+  end
+
+  def drive_down_to(floor)
+    return if driving? || floor == current_floor
+    @drive_thread = Thread.new do
+      while current_floor > floor
+        @current_floor = (@current_floor - 0.10).round(2)
+        @current_floor = floor if @current_floor < floor
+        sleep 0.5
+      end
+    end
+  end
+
+  def drive_up_to(floor)
+    return if driving? || floor == current_floor
+    @drive_thread = Thread.new do
+      while current_floor < floor
+        @current_floor = (@current_floor + 0.10).round(2)
+        @current_floor = floor if @current_floor > floor
+        sleep 0.5
+      end
+    end
   end
 
   def stop
   end
 
   def open_doors
-    # open
-    # pause 10 seconds
+    # open then wait 10 seconds
   end
 end
-
-# class OperatingPanel
-#   attr_reader :num_floors
-
-#   def initialize(num_floors)
-#     @num_floors = num_floors
-#   end
-# end
-
-# class CabShaft
-#   attr_reader :cab
-
-#   def initialize(cab = nil)
-#     @cab = nil
-#   end
-
-#   def add_cab(cab)
-#     return false if @cab
-#     @cab = cab
-#   end
-
-#   def remove_cab
-#     @cab = nil
-#   end
-# end
-
-

@@ -15,4 +15,12 @@ class SimpleQueue
   def count
     queue.count
   end
+
+  def any?
+    queue.any?
+  end
+
+  def empty?
+    queue.empty?
+  end
 end

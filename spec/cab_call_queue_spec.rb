@@ -7,8 +7,8 @@ describe CabCallQueue do
     CabCallQueue.any_instance.stub(:print)
   end
 
-  let(:cab_call_one) { CabCall.new(from_floor: 3, direction: 'up') }
-  let(:cab_call_two) { CabCall.new(from_floor: 12, direction: 'down') }
+  let(:cab_call_one) { CabCall.new(floor: 3, direction: 'up') }
+  let(:cab_call_two) { CabCall.new(floor: 12, direction: 'down') }
   let(:call_queue) { CabCallQueue.new }
 
   describe "#add" do
